@@ -1,0 +1,435 @@
+```html
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ULTRA COOKIE CLICKER</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#111;
+color:white;
+text-align:center;
+}
+
+#topbar{
+position:fixed;
+top:0;
+width:100%;
+height:70px;
+background:#1c1c1c;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:22px;
+z-index:10;
+}
+
+#cookieCount{
+font-size:26px;
+font-weight:bold;
+}
+
+#cps{
+position:absolute;
+top:40px;
+font-size:13px;
+}
+
+#storeButton{
+position:absolute;
+left:15px;
+font-size:30px;
+cursor:pointer;
+}
+
+#menuButton{
+position:absolute;
+right:15px;
+font-size:30px;
+cursor:pointer;
+}
+
+#cookie{
+width:240px;
+margin-top:120px;
+cursor:pointer;
+}
+
+/* STORE */
+
+#store{
+position:fixed;
+left:-90%;
+top:0;
+width:90%;
+height:100%;
+background:#1b1b1b;
+overflow:auto;
+transition:0.3s;
+padding-top:80px;
+}
+
+#store.open{
+left:0;
+}
+
+.storeItem{
+background:#2a2a2a;
+margin:12px;
+padding:18px;
+border-radius:10px;
+font-size:15px;
+}
+
+/* MENU */
+
+#menu{
+position:fixed;
+top:70px;
+right:-220px;
+width:200px;
+background:#222;
+padding:20px;
+transition:0.3s;
+}
+
+#menu.open{
+right:10px;
+}
+
+/* SECRET */
+
+#secretBox{
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#222;
+padding:30px;
+border-radius:12px;
+z-index:20;
+}
+
+/* MESSAGE */
+
+#message{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+background:#333;
+padding:10px 20px;
+border-radius:10px;
+display:none;
+}
+
+/* GOLDEN COOKIE */
+
+#golden{
+position:absolute;
+width:90px;
+display:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="topbar">
+
+<div id="storeButton">🛒</div>
+
+<div id="cookieCount">0 Cookies</div>
+<div id="cps">0 CPS</div>
+
+<div id="menuButton">☰</div>
+
+</div>
+
+<div id="store"></div>
+
+<div id="menu">
+<button onclick="openSecret()">Secret</button>
+<button onclick="prestige()">Prestige</button>
+<button onclick="resetGame()">Reset</button>
+    <button onclick="window.open('https://www.youtube.com/@AScodingOfficial')">
+  Press this button and Follow me on Youtube</button>
+</div>
+
+<div id="secretBox">
+<h3>Secret Passwort</h3>
+<input id="secretInput">
+<br><br>
+<button onclick="checkSecret()">OK</button>
+</div>
+
+<div id="message"></div>
+
+<img id="cookie" src="cookie.png">
+<img id="golden" src="cookie.png">
+
+<script>
+
+let cookies=0
+let clickPower=1
+let prestigeLevel=0
+
+let buildings=[]
+
+/* 10000 SHOP ITEMS */
+
+for(let i=1;i<=10000;i++){
+
+buildings.push({
+
+name:"Cookie Maschine "+i,
+icon:"🏭",
+cps:i*20,
+cost:100*Math.pow(i,1.7),
+amount:0
+
+})
+
+}
+
+/* CLICK */
+
+cookie.onclick=()=>{
+
+cookies+=clickPower
+update()
+
+}
+
+/* STORE */
+
+storeButton.onclick=()=>store.classList.toggle("open")
+menuButton.onclick=()=>menu.classList.toggle("open")
+
+function buildStore(){
+
+store.innerHTML=""
+
+buildings.forEach((b,i)=>{
+
+let div=document.createElement("div")
+div.className="storeItem"
+
+div.innerHTML=`
+${b.icon} ${b.name}<br>
+CPS: ${Math.floor(b.cps)}<br>
+Kosten: ${Math.floor(b.cost)}<br>
+Besitzt: ${b.amount}
+`
+
+div.onclick=()=>buy(i)
+
+store.appendChild(div)
+
+})
+
+}
+
+/* BUY */
+
+function buy(i){
+
+let b=buildings[i]
+
+if(cookies>=b.cost){
+
+cookies-=b.cost
+b.amount++
+
+showMessage("Gekauft: "+b.name)
+
+}else{
+
+showMessage("Nicht genug Cookies!")
+
+}
+
+update()
+buildStore()
+
+}
+
+/* CPS */
+
+function getCPS(){
+
+let cps=0
+
+buildings.forEach(b=>{
+cps+=b.amount*b.cps
+})
+
+return cps
+
+}
+
+/* PRODUCTION */
+
+setInterval(()=>{
+
+cookies+=getCPS()
+
+cps.innerText=Math.floor(getCPS())+" CPS"
+
+update()
+
+},1000)
+
+/* GOLDEN COOKIE */
+
+setInterval(()=>{
+
+golden.style.left=Math.random()*window.innerWidth+"px"
+golden.style.top=120+Math.random()*300+"px"
+
+golden.style.display="block"
+
+setTimeout(()=>golden.style.display="none",5000)
+
+},25000)
+
+golden.onclick=()=>{
+
+cookies+=cookies*0.5
+golden.style.display="none"
+
+showMessage("Golden Cookie!")
+
+update()
+
+}
+
+/* SECRET */
+
+function openSecret(){
+
+secretBox.style.display="block"
+
+}
+
+function checkSecret(){
+
+if(secretInput.value==="MPJ17"){
+
+cookies+=1000000
+showMessage("Secret aktiviert!")
+
+}else{
+
+showMessage("Falsches Passwort")
+
+}
+
+secretBox.style.display="none"
+
+update()
+
+}
+
+/* MESSAGE */
+
+function showMessage(t){
+
+message.innerText=t
+message.style.display="block"
+
+setTimeout(()=>message.style.display="none",2000)
+
+}
+
+/* PRESTIGE */
+
+function prestige(){
+
+if(cookies>=1000000){
+
+prestigeLevel++
+
+clickPower+=prestigeLevel*2
+
+cookies=0
+
+showMessage("Prestige Level "+prestigeLevel)
+
+saveGame()
+
+}
+
+}
+
+/* SAVE */
+
+function saveGame(){
+
+localStorage.setItem("cookieSave",JSON.stringify({
+
+cookies,
+clickPower,
+prestigeLevel,
+buildings
+
+}))
+
+}
+
+function loadGame(){
+
+let s=JSON.parse(localStorage.getItem("cookieSave"))
+
+if(s){
+
+cookies=s.cookies
+clickPower=s.clickPower
+prestigeLevel=s.prestigeLevel
+buildings=s.buildings
+
+}
+
+}
+
+setInterval(saveGame,5000)
+
+/* RESET */
+
+function resetGame(){
+
+if(confirm("Spiel wirklich resetten?")){
+
+localStorage.clear()
+location.reload()
+
+}
+
+}
+
+/* UPDATE */
+
+function update(){
+
+cookieCount.innerText=Math.floor(cookies)+" Cookies"
+
+}
+
+/* START */
+
+loadGame()
+buildStore()
+update()
+
+</script>
+
+</body>
+</html>
+```
