@@ -1,10 +1,9 @@
-```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultra Cookie Clicker</title>
+<title>Cookie Clicker</title>
 
 <style>
 
@@ -16,7 +15,7 @@ color:white;
 text-align:center;
 }
 
-/* TOP BAR */
+/* TOPBAR */
 
 #topbar{
 position:fixed;
@@ -41,45 +40,26 @@ top:40px;
 font-size:13px;
 }
 
-#diamondCount{
-position:absolute;
-right:90px;
-top:10px;
-color:#59d9ff;
-}
-
-#level{
-position:absolute;
-left:90px;
-top:10px;
-color:#7cff7c;
-}
-
 #storeButton{
 position:absolute;
 left:15px;
-font-size:28px;
+font-size:30px;
 cursor:pointer;
 }
 
 #menuButton{
 position:absolute;
 right:15px;
-font-size:28px;
+font-size:30px;
 cursor:pointer;
 }
 
 /* COOKIE */
 
 #cookie{
-width:230px;
+width:220px;
 margin-top:120px;
 cursor:pointer;
-transition:transform .1s;
-}
-
-#cookie:active{
-transform:scale(0.95);
 }
 
 /* STORE */
@@ -92,17 +72,51 @@ width:90%;
 height:100%;
 background:#1b1b1b;
 overflow:auto;
--webkit-overflow-scrolling:touch;
 transition:.3s;
-padding-top:80px;
+padding-top:70px;
 }
 
 #store.open{
 left:0;
 }
 
+/* FILTER */
+
+#shopFilter{
+position:sticky;
+top:0;
+background:#1b1b1b;
+padding:10px;
+border-bottom:2px solid #333;
+z-index:5;
+}
+
+#shopFilter button{
+margin:3px;
+padding:6px 10px;
+border:none;
+border-radius:6px;
+background:#333;
+color:white;
+cursor:pointer;
+}
+
+#shopFilter button:hover{
+background:#555;
+}
+
+#shopFilter select{
+padding:6px;
+border-radius:6px;
+background:#333;
+color:white;
+border:none;
+}
+
+/* SHOP ITEMS */
+
 .shopTitle{
-font-size:22px;
+font-size:20px;
 margin-top:20px;
 }
 
@@ -125,7 +139,7 @@ position:fixed;
 top:70px;
 right:-220px;
 width:200px;
-background:#1b1b1b;
+background:#222;
 padding:20px;
 transition:.3s;
 }
@@ -145,32 +159,6 @@ color:white;
 cursor:pointer;
 }
 
-#menu button:hover{
-background:#555;
-}
-
-/* POPUPS */
-
-#secretBox,#achievements{
-display:none;
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:#222;
-padding:25px;
-border-radius:12px;
-max-height:400px;
-overflow:auto;
-}
-
-.ach{
-background:#333;
-margin:4px;
-padding:6px;
-border-radius:6px;
-}
-
 /* MESSAGE */
 
 #message{
@@ -181,12 +169,6 @@ transform:translateX(-50%);
 background:#333;
 padding:10px 20px;
 border-radius:10px;
-display:none;
-}
-
-#golden{
-position:absolute;
-width:90px;
 display:none;
 }
 
@@ -202,73 +184,76 @@ display:none;
 <div id="cookieCount">0 Cookies</div>
 <div id="cps">0 CPS</div>
 
-<div id="diamondCount">💎 0</div>
-<div id="level">LVL 1</div>
-
 <div id="menuButton">☰</div>
 
 </div>
 
-<div id="store"></div>
+<img id="cookie" src="cookie.png">
 
-<div id="menu">
+<div id="store">
 
-<button onclick="openAchievements()">🏆 Achievements</button>
-<button onclick="openSecret()">🔑 Secret</button>
-<button onclick="prestige()">⭐ Prestige</button>
-<button onclick="resetGame()">♻ Reset</button>
+<div id="shopFilter">
 
-</div>
-
-<div id="secretBox">
-
-<h3>Secret Passwort</h3>
-
-<input id="secretInput">
+<button onclick="setFilter('all')">Alle</button>
+<button onclick="setFilter('machines')">Maschinen</button>
+<button onclick="setFilter('upgrades')">Upgrades</button>
+<button onclick="setFilter('diamonds')">Diamanten</button>
 
 <br><br>
 
-<button onclick="checkSecret()">OK</button>
+<select id="priceFilter" onchange="buildStore()">
+<option value="all">Alle Preise</option>
+<option value="1000">Unter 1K</option>
+<option value="10000">Unter 10K</option>
+<option value="100000">Unter 100K</option>
+<option value="1000000">Unter 1M</option>
+<option value="999999999999">∞ Unendlich</option>
+</select>
 
 </div>
 
-<div id="achievements">
+<div id="shopContent"></div>
 
-<h3>Achievements</h3>
+</div>
 
-<div id="achList"></div>
+<div id="menu">
 
+<button onclick="openSecret()">Secret</button>
+<button onclick="resetGame()">Reset</button>
+<button onclick="window.open('https://www.youtube.com/@AScodingOfficial')">
+  Press this button and Follow me on Youtube</button>
+
+</div>
+
+<div id="secretBox" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#222;padding:25px;border-radius:10px;">
+<h3>Secret Passwort</h3>
+<input id="secretInput">
+<br><br>
+<button onclick="checkSecret()">OK</button>
 </div>
 
 <div id="message"></div>
-
-<img id="cookie" src="cookie.png">
-<img id="golden" src="cookie.png">
 
 <script>
 
 /* VARIABLES */
 
 let cookies=0
-let diamonds=0
 let clickPower=1
-let prestigeLevel=0
-let level=1
+let shopFilter="all"
+let diamonds=0
 
 let buildings=[]
 let upgrades=[]
 let diamondShop=[]
-let achievements=[]
 
 /* FORMAT */
 
 function format(n){
 
-if(n>=1e15)return (n/1e15).toFixed(2)+"Qa"
-if(n>=1e12)return (n/1e12).toFixed(2)+"T"
-if(n>=1e9)return (n/1e9).toFixed(2)+"B"
-if(n>=1e6)return (n/1e6).toFixed(2)+"M"
-if(n>=1e3)return (n/1e3).toFixed(2)+"K"
+if(n>=1e9)return (n/1e9).toFixed(1)+"B"
+if(n>=1e6)return (n/1e6).toFixed(1)+"M"
+if(n>=1e3)return (n/1e3).toFixed(1)+"K"
 
 return Math.floor(n)
 
@@ -276,13 +261,14 @@ return Math.floor(n)
 
 /* BUILDINGS */
 
-for(let i=1;i<=1000;i++){
+for(let i=1;i<=100;i++){
 
 buildings.push({
 
 name:"Maschine "+i,
 cps:i*5,
-cost:100*Math.pow(i,1.5),
+cost:100*Math.pow(i,1.6),
+unlock:i*500,
 amount:0
 
 })
@@ -291,17 +277,14 @@ amount:0
 
 /* UPGRADES */
 
-for(let i=1;i<=300;i++){
+for(let i=1;i<=40;i++){
 
 upgrades.push({
 
 name:"Upgrade "+i,
-cost:1000*i,
+cost:2000*i,
 bought:false,
-
-effect(){
-clickPower+=1+i*0.2
-}
+effect(){clickPower+=i}
 
 })
 
@@ -309,31 +292,14 @@ clickPower+=1+i*0.2
 
 /* DIAMOND SHOP */
 
-for(let i=1;i<=120;i++){
+for(let i=1;i<=20;i++){
 
 diamondShop.push({
 
-name:"Diamant Power "+i,
+name:"Diamant Boost "+i,
 cost:5+i,
 bought:false,
-
-effect(){
-clickPower+=10
-}
-
-})
-
-}
-
-/* ACHIEVEMENTS */
-
-for(let i=1;i<=50;i++){
-
-achievements.push({
-
-name:"Cookie Master "+i,
-goal:1000*i,
-done:false
+effect(){clickPower+=10}
 
 })
 
@@ -354,7 +320,16 @@ update()
 
 }
 
-/* STORE */
+/* FILTER */
+
+function setFilter(type){
+
+shopFilter=type
+buildStore()
+
+}
+
+/* STORE OPEN */
 
 storeButton.onclick=()=>{
 
@@ -365,45 +340,47 @@ buildStore()
 
 menuButton.onclick=()=>menu.classList.toggle("open")
 
+/* BUILD STORE */
+
 function buildStore(){
 
-store.innerHTML=""
+shopContent.innerHTML=""
 
-/* BUILDINGS */
+let maxPrice=document.getElementById("priceFilter").value
 
-addSection("🍪 Maschinen",buildings,true)
+if(shopFilter==="all"||shopFilter==="machines")
+addSection("🍪 Maschinen",buildings,true,false,maxPrice)
 
-/* UPGRADES */
+if(shopFilter==="all"||shopFilter==="upgrades")
+addSection("⚡ Upgrades",upgrades,false,false,maxPrice)
 
-addSection("⚡ Upgrades",upgrades,false)
-
-/* DIAMOND SHOP */
-
-addSection("💎 Diamanten Shop",diamondShop,false,true)
+if(shopFilter==="all"||shopFilter==="diamonds")
+addSection("💎 Diamanten Shop",diamondShop,false,true,maxPrice)
 
 }
 
-function addSection(title,data,isBuilding,diamond){
+function addSection(title,data,isBuilding,diamond,maxPrice){
 
 let t=document.createElement("div")
 t.className="shopTitle"
 t.innerText=title
-
-store.appendChild(t)
+shopContent.appendChild(t)
 
 data.forEach((item,i)=>{
 
-if(item.bought)return
+if(isBuilding && cookies < item.unlock) return
+
+if(item.bought) return
+
+if(maxPrice!="all" && item.cost>maxPrice) return
 
 let div=document.createElement("div")
 div.className="storeItem"
 
-let cost=diamond?"💎 "+item.cost:format(item.cost)
-
 div.innerHTML=`
 ${item.name}<br>
-Kosten: ${cost}
-${isBuilding?"<br>CPS: "+format(item.cps)+"<br>Besitzt: "+item.amount:""}
+Kosten: ${diamond?"💎 "+item.cost:format(item.cost)}
+${isBuilding?"<br>CPS: "+item.cps+"<br>Besitzt: "+item.amount:""}
 `
 
 div.onclick=()=>{
@@ -414,7 +391,7 @@ else buyUpgrade(i)
 
 }
 
-store.appendChild(div)
+shopContent.appendChild(div)
 
 })
 
@@ -431,7 +408,7 @@ if(cookies>=b.cost){
 cookies-=b.cost
 b.amount++
 
-}else showMessage("Nicht genug Cookies")
+}
 
 update()
 buildStore()
@@ -448,9 +425,7 @@ cookies-=u.cost
 u.effect()
 u.bought=true
 
-showMessage("Upgrade!")
-
-}else showMessage("Nicht genug Cookies")
+}
 
 update()
 buildStore()
@@ -467,9 +442,7 @@ diamonds-=d.cost
 d.effect()
 d.bought=true
 
-showMessage("Diamanten Upgrade!")
-
-}else showMessage("Nicht genug Diamanten")
+}
 
 update()
 buildStore()
@@ -481,11 +454,7 @@ buildStore()
 function getCPS(){
 
 let cps=0
-
-buildings.forEach(b=>{
-cps+=b.amount*b.cps
-})
-
+buildings.forEach(b=>cps+=b.amount*b.cps)
 return cps
 
 }
@@ -495,39 +464,11 @@ return cps
 setInterval(()=>{
 
 cookies+=getCPS()
-
-level=Math.floor(cookies/1000)+1
-
 cps.innerText=format(getCPS())+" CPS"
 
 update()
 
 },1000)
-
-/* GOLDEN COOKIE */
-
-setInterval(()=>{
-
-golden.style.left=Math.random()*window.innerWidth+"px"
-golden.style.top=120+Math.random()*300+"px"
-
-golden.style.display="block"
-
-setTimeout(()=>golden.style.display="none",5000)
-
-},25000)
-
-golden.onclick=()=>{
-
-cookies+=cookies*0.5
-
-showMessage("Golden Cookie!")
-
-golden.style.display="none"
-
-update()
-
-}
 
 /* SECRET */
 
@@ -544,124 +485,14 @@ if(secretInput.value==="MPJ17"){
 cookies+=1000000
 showMessage("Secret aktiviert!")
 
-}else showMessage("Falsches Passwort")
+}else{
+
+showMessage("Falsches Passwort")
+
+}
 
 secretBox.style.display="none"
-
 update()
-
-}
-
-/* ACHIEVEMENTS */
-
-function checkAchievements(){
-
-achievements.forEach(a=>{
-
-if(!a.done && cookies>=a.goal){
-
-a.done=true
-diamonds+=2
-
-showMessage("🏆 Achievement!")
-
-}
-
-})
-
-}
-
-function openAchievements(){
-
-achievements.style.display="block"
-
-achList.innerHTML=""
-
-achievements.forEach(a=>{
-
-let div=document.createElement("div")
-div.className="ach"
-
-div.innerText=a.name+(a.done?" ✅":"")
-
-achList.appendChild(div)
-
-})
-
-}
-
-/* OFFLINE PROGRESS */
-
-function offlineProgress(){
-
-let last=localStorage.getItem("lastTime")
-
-if(last){
-
-let diff=(Date.now()-last)/1000
-
-let gain=diff*getCPS()
-
-cookies+=gain
-
-if(gain>0)showMessage("🌍 Offline: "+format(gain))
-
-}
-
-}
-
-/* SAVE */
-
-function saveGame(){
-
-localStorage.setItem("lastTime",Date.now())
-
-localStorage.setItem("cookieSave",JSON.stringify({
-
-cookies,
-diamonds,
-clickPower,
-prestigeLevel,
-level,
-buildings,
-upgrades,
-diamondShop
-
-}))
-
-}
-
-function loadGame(){
-
-let s=JSON.parse(localStorage.getItem("cookieSave"))
-
-if(s){
-
-cookies=s.cookies
-diamonds=s.diamonds
-clickPower=s.clickPower
-prestigeLevel=s.prestigeLevel
-level=s.level
-buildings=s.buildings
-upgrades=s.upgrades
-diamondShop=s.diamondShop
-
-}
-
-}
-
-setInterval(saveGame,5000)
-
-/* RESET */
-
-function resetGame(){
-
-if(confirm("Spiel wirklich resetten?")){
-
-localStorage.clear()
-location.reload()
-
-}
 
 }
 
@@ -676,22 +507,60 @@ setTimeout(()=>message.style.display="none",2000)
 
 }
 
+/* SAVE */
+
+function saveGame(){
+
+localStorage.setItem("cookieSave",JSON.stringify({
+cookies,
+diamonds,
+buildings,
+upgrades
+}))
+
+}
+
+function loadGame(){
+
+let s=JSON.parse(localStorage.getItem("cookieSave"))
+
+if(s){
+
+cookies=s.cookies
+diamonds=s.diamonds
+buildings=s.buildings
+upgrades=s.upgrades
+
+}
+
+}
+
+setInterval(saveGame,5000)
+
+/* RESET */
+
+function resetGame(){
+
+if(confirm("Spiel resetten?")){
+
+localStorage.clear()
+location.reload()
+
+}
+
+}
+
 /* UPDATE */
 
 function update(){
 
 cookieCount.innerText=format(cookies)+" Cookies"
-diamondCount.innerText="💎 "+diamonds
-document.getElementById("level").innerText="LVL "+level
-
-checkAchievements()
 
 }
 
 /* START */
 
 loadGame()
-offlineProgress()
 buildStore()
 update()
 
@@ -699,4 +568,3 @@ update()
 
 </body>
 </html>
-```
