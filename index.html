@@ -10,7 +10,7 @@
 body{
 margin:0;
 font-family:Arial;
-background:#111;
+background:linear-gradient(#1a1a1a,#0e0e0e);
 color:white;
 text-align:center;
 }
@@ -27,6 +27,7 @@ display:flex;
 align-items:center;
 justify-content:center;
 z-index:10;
+box-shadow:0 2px 10px black;
 }
 
 #cookieCount{
@@ -38,6 +39,7 @@ font-weight:bold;
 position:absolute;
 top:40px;
 font-size:13px;
+color:#bbb;
 }
 
 #storeButton{
@@ -63,9 +65,15 @@ font-size:18px;
 /* COOKIE */
 
 #cookie{
-width:220px;
-margin-top:120px;
+width:70vw;
+max-width:420px;
+margin-top:130px;
 cursor:pointer;
+transition:transform .08s;
+}
+
+#cookie.pop{
+transform:scale(1.12) rotate(3deg);
 }
 
 /* STORE */
@@ -86,32 +94,22 @@ padding-top:70px;
 left:0;
 }
 
-/* FILTER */
-
 #shopFilter{
 position:sticky;
 top:0;
 background:#1b1b1b;
-padding:10px;
+padding:12px;
 border-bottom:2px solid #333;
 }
 
-#shopFilter button{
-margin:3px;
-padding:6px 10px;
+.filterBtn{
+margin:4px;
+padding:8px 14px;
 border:none;
-border-radius:6px;
+border-radius:20px;
 background:#333;
 color:white;
 cursor:pointer;
-}
-
-#shopFilter select{
-padding:6px;
-border-radius:6px;
-background:#333;
-color:white;
-border:none;
 }
 
 .shopTitle{
@@ -158,6 +156,19 @@ color:white;
 cursor:pointer;
 }
 
+/* SECRET */
+
+#secretBox{
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#222;
+padding:25px;
+border-radius:10px;
+}
+
 /* MESSAGE */
 
 #message{
@@ -193,23 +204,10 @@ display:none;
 <div id="store">
 
 <div id="shopFilter">
-
-<button onclick="setFilter('all')">Alle</button>
-<button onclick="setFilter('machines')">Maschinen</button>
-<button onclick="setFilter('upgrades')">Upgrades</button>
-<button onclick="setFilter('diamonds')">Diamanten</button>
-
-<br><br>
-
-<select id="priceFilter" onchange="buildStore()">
-<option value="all">Alle Preise</option>
-<option value="1000">Unter 1K</option>
-<option value="10000">Unter 10K</option>
-<option value="100000">Unter 100K</option>
-<option value="1000000">Unter 1M</option>
-<option value="999999999999">∞</option>
-</select>
-
+<button class="filterBtn" onclick="setFilter('all')">Alle</button>
+<button class="filterBtn" onclick="setFilter('machines')">Maschinen</button>
+<button class="filterBtn" onclick="setFilter('upgrades')">Upgrades</button>
+<button class="filterBtn" onclick="setFilter('diamonds')">Diamanten</button>
 </div>
 
 <div id="shopContent"></div>
@@ -217,15 +215,16 @@ display:none;
 </div>
 
 <div id="menu">
-
 <button onclick="openSecret()">Secret</button>
 <button onclick="resetGame()">Reset</button>
 <button onclick="window.open('https://www.youtube.com/@ascodexOfficial')">
-Press this button and Follow me on Youtube</button>
+  Press this button and Follow me on Youtube</button>
 
+<button onclick="window.open('https://www.instagram.com/ascodexofficial/')">
+  Press this button and Follow me on Instagram</button>
 </div>
 
-<div id="secretBox" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#222;padding:25px;border-radius:10px;">
+<div id="secretBox">
 <h3>Secret Passwort</h3>
 <input id="secretInput">
 <br><br>
@@ -236,10 +235,8 @@ Press this button and Follow me on Youtube</button>
 
 <script>
 
-/* VARIABLES */
-
 let cookies=0n
-let diamonds=0
+let diamonds=0n
 let clickPower=1n
 let shopFilter="all"
 
@@ -247,15 +244,10 @@ let buildings=[]
 let upgrades=[]
 let diamondShop=[]
 
-let diamondsDisplay=document.getElementById("diamonds")
-
-/* FORMAT */
-
 function format(n){
 
 n=BigInt(n)
 
-if(n>1000000000000000000n)return "∞"
 if(n>=1000000000n)return (Number(n/100000000n)/10)+"B"
 if(n>=1000000n)return (Number(n/100000n)/10)+"M"
 if(n>=1000n)return (Number(n/100n)/10)+"K"
@@ -264,15 +256,14 @@ return n.toString()
 
 }
 
-/* MANY MACHINES */
+/* BUILDINGS */
 
-for(let i=1;i<=300;i++){
+for(let i=1;i<=200;i++){
 
 buildings.push({
 name:"Maschine "+i,
-cps:BigInt(i*5),
+cps:BigInt(i*3),
 cost:BigInt(Math.floor(100*Math.pow(i,1.8))),
-unlock:BigInt(i*500),
 amount:0n
 })
 
@@ -284,7 +275,7 @@ for(let i=1;i<=40;i++){
 
 upgrades.push({
 name:"Upgrade "+i,
-cost:2000*i,
+cost:BigInt(2000*i),
 bought:false,
 effect(){clickPower+=BigInt(i)}
 })
@@ -297,7 +288,7 @@ for(let i=1;i<=20;i++){
 
 diamondShop.push({
 name:"Diamant Boost "+i,
-cost:5+i,
+cost:BigInt(5+i),
 bought:false,
 effect(){clickPower+=10n}
 })
@@ -310,16 +301,20 @@ cookie.onclick=()=>{
 
 cookies+=clickPower
 
+cookie.classList.add("pop")
+setTimeout(()=>cookie.classList.remove("pop"),100)
+
 if(Math.random()<0.005){
 diamonds++
 showMessage("💎 Diamant!")
 }
 
 update()
+saveGame()
 
 }
 
-/* STORE OPEN */
+/* STORE */
 
 storeButton.onclick=()=>{
 store.classList.toggle("open")
@@ -330,32 +325,29 @@ menuButton.onclick=()=>{
 menu.classList.toggle("open")
 }
 
-/* FILTER */
-
 function setFilter(type){
 shopFilter=type
 buildStore()
 }
 
-/* BUILD STORE */
+/* STORE BUILD */
 
 function buildStore(){
 
 shopContent.innerHTML=""
-let maxPrice=document.getElementById("priceFilter").value
 
 if(shopFilter==="all"||shopFilter==="machines")
-addSection("🍪 Maschinen",buildings,true,false,maxPrice)
+addSection("🍪 Maschinen",buildings,true,false)
 
 if(shopFilter==="all"||shopFilter==="upgrades")
-addSection("⚡ Upgrades",upgrades,false,false,maxPrice)
+addSection("⚡ Upgrades",upgrades,false,false)
 
 if(shopFilter==="all"||shopFilter==="diamonds")
-addSection("💎 Diamanten Shop",diamondShop,false,true,maxPrice)
+addSection("💎 Diamanten Shop",diamondShop,false,true)
 
 }
 
-function addSection(title,data,isBuilding,diamond,maxPrice){
+function addSection(title,data,isBuilding,diamond){
 
 let t=document.createElement("div")
 t.className="shopTitle"
@@ -364,10 +356,6 @@ shopContent.appendChild(t)
 
 data.forEach((item,i)=>{
 
-if(isBuilding && cookies < item.unlock) return
-if(item.bought) return
-if(maxPrice!="all" && item.cost>maxPrice) return
-
 let div=document.createElement("div")
 div.className="storeItem"
 
@@ -375,6 +363,7 @@ div.innerHTML=`
 ${item.name}<br>
 Kosten: ${diamond?"💎 "+item.cost:format(item.cost)}
 ${isBuilding?"<br>CPS: "+item.cps+"<br>Besitzt: "+item.amount:""}
+${item.bought?"<br>✔ Gekauft":""}
 `
 
 div.onclick=()=>{
@@ -402,6 +391,7 @@ b.amount++
 
 update()
 buildStore()
+saveGame()
 
 }
 
@@ -409,20 +399,25 @@ function buyUpgrade(i){
 
 let u=upgrades[i]
 
-if(cookies>=BigInt(u.cost)){
-cookies-=BigInt(u.cost)
+if(u.bought) return
+
+if(cookies>=u.cost){
+cookies-=u.cost
 u.effect()
 u.bought=true
 }
 
 update()
 buildStore()
+saveGame()
 
 }
 
 function buyDiamond(i){
 
 let d=diamondShop[i]
+
+if(d.bought) return
 
 if(diamonds>=d.cost){
 diamonds-=d.cost
@@ -432,6 +427,7 @@ d.bought=true
 
 update()
 buildStore()
+saveGame()
 
 }
 
@@ -449,12 +445,18 @@ return cps
 
 }
 
-/* GAME LOOP */
+/* LOOP */
 
 setInterval(()=>{
-cookies+=getCPS()
-cps.innerText=format(getCPS())+" CPS"
+
+let cpsNow=getCPS()
+
+cookies+=cpsNow
+
+cps.innerText=format(cpsNow)+" CPS"
+
 update()
+
 },1000)
 
 /* SECRET */
@@ -492,30 +494,42 @@ setTimeout(()=>message.style.display="none",2000)
 
 function saveGame(){
 
+let saveBuildings=buildings.map(b=>({
+name:b.name,
+cps:b.cps.toString(),
+cost:b.cost.toString(),
+amount:b.amount.toString()
+}))
+
 localStorage.setItem("cookieSave",JSON.stringify({
 cookies:cookies.toString(),
-diamonds,
-buildings,
-upgrades,
+diamonds:diamonds.toString(),
+buildings:saveBuildings,
 last:Date.now()
 }))
 
 }
 
-/* LOAD + OFFLINE */
+/* LOAD */
 
 function loadGame(){
 
 let s=JSON.parse(localStorage.getItem("cookieSave"))
 
-if(s){
+if(!s) return
 
 cookies=BigInt(s.cookies)
-diamonds=s.diamonds
-buildings=s.buildings
-upgrades=s.upgrades
+diamonds=BigInt(s.diamonds)
+
+buildings=s.buildings.map(b=>({
+name:b.name,
+cps:BigInt(b.cps),
+cost:BigInt(b.cost),
+amount:BigInt(b.amount)
+}))
 
 let offlineSeconds=Math.floor((Date.now()-s.last)/1000)
+
 let offlineGain=getCPS()*BigInt(offlineSeconds)
 
 cookies+=offlineGain
@@ -525,10 +539,6 @@ showMessage("Offline Cookies: "+format(offlineGain))
 }
 
 }
-
-}
-
-setInterval(saveGame,5000)
 
 /* RESET */
 
@@ -546,9 +556,13 @@ location.reload()
 function update(){
 
 cookieCount.innerText=format(cookies)+" Cookies"
-diamondsDisplay.innerText="💎 "+diamonds
+document.getElementById("diamonds").innerText="💎 "+diamonds
 
 }
+
+/* AUTOSAVE */
+
+setInterval(saveGame,5000)
 
 /* START */
 
