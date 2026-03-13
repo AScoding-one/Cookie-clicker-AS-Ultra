@@ -54,6 +54,12 @@ font-size:30px;
 cursor:pointer;
 }
 
+#diamonds{
+position:absolute;
+left:60px;
+font-size:18px;
+}
+
 /* COOKIE */
 
 #cookie{
@@ -88,7 +94,6 @@ top:0;
 background:#1b1b1b;
 padding:10px;
 border-bottom:2px solid #333;
-z-index:5;
 }
 
 #shopFilter button{
@@ -101,10 +106,6 @@ color:white;
 cursor:pointer;
 }
 
-#shopFilter button:hover{
-background:#555;
-}
-
 #shopFilter select{
 padding:6px;
 border-radius:6px;
@@ -112,8 +113,6 @@ background:#333;
 color:white;
 border:none;
 }
-
-/* SHOP ITEMS */
 
 .shopTitle{
 font-size:20px;
@@ -180,6 +179,7 @@ display:none;
 <div id="topbar">
 
 <div id="storeButton">🛒</div>
+<div id="diamonds">💎 0</div>
 
 <div id="cookieCount">0 Cookies</div>
 <div id="cps">0 CPS</div>
@@ -207,7 +207,7 @@ display:none;
 <option value="10000">Unter 10K</option>
 <option value="100000">Unter 100K</option>
 <option value="1000000">Unter 1M</option>
-<option value="999999999999">∞ Unendlich</option>
+<option value="999999999999">∞</option>
 </select>
 
 </div>
@@ -220,8 +220,8 @@ display:none;
 
 <button onclick="openSecret()">Secret</button>
 <button onclick="resetGame()">Reset</button>
-<button onclick="window.open('https://www.youtube.com/@AScodingOfficial')">
-  Press this button and Follow me on Youtube</button>
+<button onclick="window.open('https://www.youtube.com/@ascodexOfficial')">
+Press this button and Follow me on Youtube</button>
 
 </div>
 
@@ -238,39 +238,42 @@ display:none;
 
 /* VARIABLES */
 
-let cookies=0
-let clickPower=1
-let shopFilter="all"
+let cookies=0n
 let diamonds=0
+let clickPower=1n
+let shopFilter="all"
 
 let buildings=[]
 let upgrades=[]
 let diamondShop=[]
 
+let diamondsDisplay=document.getElementById("diamonds")
+
 /* FORMAT */
 
 function format(n){
 
-if(n>=1e9)return (n/1e9).toFixed(1)+"B"
-if(n>=1e6)return (n/1e6).toFixed(1)+"M"
-if(n>=1e3)return (n/1e3).toFixed(1)+"K"
+n=BigInt(n)
 
-return Math.floor(n)
+if(n>1000000000000000000n)return "∞"
+if(n>=1000000000n)return (Number(n/100000000n)/10)+"B"
+if(n>=1000000n)return (Number(n/100000n)/10)+"M"
+if(n>=1000n)return (Number(n/100n)/10)+"K"
+
+return n.toString()
 
 }
 
-/* BUILDINGS */
+/* MANY MACHINES */
 
-for(let i=1;i<=100;i++){
+for(let i=1;i<=300;i++){
 
 buildings.push({
-
 name:"Maschine "+i,
-cps:i*5,
-cost:100*Math.pow(i,1.6),
-unlock:i*500,
-amount:0
-
+cps:BigInt(i*5),
+cost:BigInt(Math.floor(100*Math.pow(i,1.8))),
+unlock:BigInt(i*500),
+amount:0n
 })
 
 }
@@ -280,12 +283,10 @@ amount:0
 for(let i=1;i<=40;i++){
 
 upgrades.push({
-
 name:"Upgrade "+i,
 cost:2000*i,
 bought:false,
-effect(){clickPower+=i}
-
+effect(){clickPower+=BigInt(i)}
 })
 
 }
@@ -295,12 +296,10 @@ effect(){clickPower+=i}
 for(let i=1;i<=20;i++){
 
 diamondShop.push({
-
 name:"Diamant Boost "+i,
 cost:5+i,
 bought:false,
-effect(){clickPower+=10}
-
+effect(){clickPower+=10n}
 })
 
 }
@@ -311,7 +310,7 @@ cookie.onclick=()=>{
 
 cookies+=clickPower
 
-if(Math.random()<0.02){
+if(Math.random()<0.005){
 diamonds++
 showMessage("💎 Diamant!")
 }
@@ -320,32 +319,29 @@ update()
 
 }
 
-/* FILTER */
-
-function setFilter(type){
-
-shopFilter=type
-buildStore()
-
-}
-
 /* STORE OPEN */
 
 storeButton.onclick=()=>{
-
 store.classList.toggle("open")
 buildStore()
-
 }
 
-menuButton.onclick=()=>menu.classList.toggle("open")
+menuButton.onclick=()=>{
+menu.classList.toggle("open")
+}
+
+/* FILTER */
+
+function setFilter(type){
+shopFilter=type
+buildStore()
+}
 
 /* BUILD STORE */
 
 function buildStore(){
 
 shopContent.innerHTML=""
-
 let maxPrice=document.getElementById("priceFilter").value
 
 if(shopFilter==="all"||shopFilter==="machines")
@@ -369,9 +365,7 @@ shopContent.appendChild(t)
 data.forEach((item,i)=>{
 
 if(isBuilding && cookies < item.unlock) return
-
 if(item.bought) return
-
 if(maxPrice!="all" && item.cost>maxPrice) return
 
 let div=document.createElement("div")
@@ -384,11 +378,9 @@ ${isBuilding?"<br>CPS: "+item.cps+"<br>Besitzt: "+item.amount:""}
 `
 
 div.onclick=()=>{
-
 if(isBuilding)buyBuilding(i)
 else if(diamond)buyDiamond(i)
 else buyUpgrade(i)
-
 }
 
 shopContent.appendChild(div)
@@ -404,10 +396,8 @@ function buyBuilding(i){
 let b=buildings[i]
 
 if(cookies>=b.cost){
-
 cookies-=b.cost
 b.amount++
-
 }
 
 update()
@@ -419,12 +409,10 @@ function buyUpgrade(i){
 
 let u=upgrades[i]
 
-if(cookies>=u.cost){
-
-cookies-=u.cost
+if(cookies>=BigInt(u.cost)){
+cookies-=BigInt(u.cost)
 u.effect()
 u.bought=true
-
 }
 
 update()
@@ -437,11 +425,9 @@ function buyDiamond(i){
 let d=diamondShop[i]
 
 if(diamonds>=d.cost){
-
 diamonds-=d.cost
 d.effect()
 d.bought=true
-
 }
 
 update()
@@ -453,8 +439,12 @@ buildStore()
 
 function getCPS(){
 
-let cps=0
-buildings.forEach(b=>cps+=b.amount*b.cps)
+let cps=0n
+
+buildings.forEach(b=>{
+cps+=b.amount*b.cps
+})
+
 return cps
 
 }
@@ -462,33 +452,24 @@ return cps
 /* GAME LOOP */
 
 setInterval(()=>{
-
 cookies+=getCPS()
 cps.innerText=format(getCPS())+" CPS"
-
 update()
-
 },1000)
 
 /* SECRET */
 
 function openSecret(){
-
 secretBox.style.display="block"
-
 }
 
 function checkSecret(){
 
 if(secretInput.value==="MPJ17"){
-
-cookies+=1000000
+cookies+=100000n
 showMessage("Secret aktiviert!")
-
 }else{
-
 showMessage("Falsches Passwort")
-
 }
 
 secretBox.style.display="none"
@@ -512,13 +493,16 @@ setTimeout(()=>message.style.display="none",2000)
 function saveGame(){
 
 localStorage.setItem("cookieSave",JSON.stringify({
-cookies,
+cookies:cookies.toString(),
 diamonds,
 buildings,
-upgrades
+upgrades,
+last:Date.now()
 }))
 
 }
+
+/* LOAD + OFFLINE */
 
 function loadGame(){
 
@@ -526,10 +510,19 @@ let s=JSON.parse(localStorage.getItem("cookieSave"))
 
 if(s){
 
-cookies=s.cookies
+cookies=BigInt(s.cookies)
 diamonds=s.diamonds
 buildings=s.buildings
 upgrades=s.upgrades
+
+let offlineSeconds=Math.floor((Date.now()-s.last)/1000)
+let offlineGain=getCPS()*BigInt(offlineSeconds)
+
+cookies+=offlineGain
+
+if(offlineGain>0n){
+showMessage("Offline Cookies: "+format(offlineGain))
+}
 
 }
 
@@ -542,10 +535,8 @@ setInterval(saveGame,5000)
 function resetGame(){
 
 if(confirm("Spiel resetten?")){
-
 localStorage.clear()
 location.reload()
-
 }
 
 }
@@ -555,6 +546,7 @@ location.reload()
 function update(){
 
 cookieCount.innerText=format(cookies)+" Cookies"
+diamondsDisplay.innerText="💎 "+diamonds
 
 }
 
