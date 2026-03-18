@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cookie Clicker</title>
 
+<!-- NEU: ICON + MANIFEST -->
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="manifest" href="manifest.json">
+
 <style>
 
 body{
@@ -235,6 +239,7 @@ display:none;
 
 <script>
 
+/* DEIN GANZER JS CODE UNVERÄNDERT */
 let cookies=0n
 let diamonds=0n
 let clickPower=1n
@@ -245,77 +250,57 @@ let upgrades=[]
 let diamondShop=[]
 
 function format(n){
-
 n=BigInt(n)
-
 if(n>=1000000000n)return (Number(n/100000000n)/10)+"B"
 if(n>=1000000n)return (Number(n/100000n)/10)+"M"
 if(n>=1000n)return (Number(n/100n)/10)+"K"
-
 return n.toString()
-
 }
 
 /* BUILDINGS */
-
 for(let i=1;i<=200;i++){
-
 buildings.push({
 name:"Maschine "+i,
 cps:BigInt(i*3),
 cost:BigInt(Math.floor(100*Math.pow(i,1.8))),
 amount:0n
 })
-
 }
 
 /* UPGRADES */
-
 for(let i=1;i<=40;i++){
-
 upgrades.push({
 name:"Upgrade "+i,
 cost:BigInt(2000*i),
 bought:false,
 effect(){clickPower+=BigInt(i)}
 })
-
 }
 
 /* DIAMOND SHOP */
-
 for(let i=1;i<=20;i++){
-
 diamondShop.push({
 name:"Diamant Boost "+i,
 cost:BigInt(5+i),
 bought:false,
 effect(){clickPower+=10n}
 })
-
 }
 
 /* CLICK */
-
 cookie.onclick=()=>{
-
 cookies+=clickPower
-
 cookie.classList.add("pop")
 setTimeout(()=>cookie.classList.remove("pop"),100)
-
 if(Math.random()<0.005){
 diamonds++
 showMessage("💎 Diamant!")
 }
-
 update()
 saveGame()
-
 }
 
 /* STORE */
-
 storeButton.onclick=()=>{
 store.classList.toggle("open")
 buildStore()
@@ -331,31 +316,23 @@ buildStore()
 }
 
 /* STORE BUILD */
-
 function buildStore(){
-
 shopContent.innerHTML=""
-
 if(shopFilter==="all"||shopFilter==="machines")
 addSection("🍪 Maschinen",buildings,true,false)
-
 if(shopFilter==="all"||shopFilter==="upgrades")
 addSection("⚡ Upgrades",upgrades,false,false)
-
 if(shopFilter==="all"||shopFilter==="diamonds")
 addSection("💎 Diamanten Shop",diamondShop,false,true)
-
 }
 
 function addSection(title,data,isBuilding,diamond){
-
 let t=document.createElement("div")
 t.className="shopTitle"
 t.innerText=title
 shopContent.appendChild(t)
 
 data.forEach((item,i)=>{
-
 let div=document.createElement("div")
 div.className="storeItem"
 
@@ -373,127 +350,89 @@ else buyUpgrade(i)
 }
 
 shopContent.appendChild(div)
-
 })
-
 }
 
 /* BUY */
-
 function buyBuilding(i){
-
 let b=buildings[i]
-
 if(cookies>=b.cost){
 cookies-=b.cost
 b.amount++
 }
-
 update()
 buildStore()
 saveGame()
-
 }
 
 function buyUpgrade(i){
-
 let u=upgrades[i]
-
 if(u.bought) return
-
 if(cookies>=u.cost){
 cookies-=u.cost
 u.effect()
 u.bought=true
 }
-
 update()
 buildStore()
 saveGame()
-
 }
 
 function buyDiamond(i){
-
 let d=diamondShop[i]
-
 if(d.bought) return
-
 if(diamonds>=d.cost){
 diamonds-=d.cost
 d.effect()
 d.bought=true
 }
-
 update()
 buildStore()
 saveGame()
-
 }
 
 /* CPS */
-
 function getCPS(){
-
 let cps=0n
-
 buildings.forEach(b=>{
 cps+=b.amount*b.cps
 })
-
 return cps
-
 }
 
 /* LOOP */
-
 setInterval(()=>{
-
 let cpsNow=getCPS()
-
 cookies+=cpsNow
-
 cps.innerText=format(cpsNow)+" CPS"
-
 update()
-
 },1000)
 
 /* SECRET */
-
 function openSecret(){
 secretBox.style.display="block"
 }
 
 function checkSecret(){
-
 if(secretInput.value==="MPJ17"){
 cookies+=100000n
 showMessage("Secret aktiviert!")
 }else{
 showMessage("Falsches Passwort")
 }
-
 secretBox.style.display="none"
 update()
-
 }
 
 /* MESSAGE */
-
 function showMessage(t){
-
 message.innerText=t
 message.style.display="block"
-
 setTimeout(()=>message.style.display="none",2000)
-
 }
 
 /* SAVE */
-
 function saveGame(){
-
 let saveBuildings=buildings.map(b=>({
 name:b.name,
 cps:b.cps.toString(),
@@ -507,15 +446,11 @@ diamonds:diamonds.toString(),
 buildings:saveBuildings,
 last:Date.now()
 }))
-
 }
 
 /* LOAD */
-
 function loadGame(){
-
 let s=JSON.parse(localStorage.getItem("cookieSave"))
-
 if(!s) return
 
 cookies=BigInt(s.cookies)
@@ -529,43 +464,32 @@ amount:BigInt(b.amount)
 }))
 
 let offlineSeconds=Math.floor((Date.now()-s.last)/1000)
-
 let offlineGain=getCPS()*BigInt(offlineSeconds)
-
 cookies+=offlineGain
 
 if(offlineGain>0n){
 showMessage("Offline Cookies: "+format(offlineGain))
 }
-
 }
 
 /* RESET */
-
 function resetGame(){
-
 if(confirm("Spiel resetten?")){
 localStorage.clear()
 location.reload()
 }
-
 }
 
 /* UPDATE */
-
 function update(){
-
 cookieCount.innerText=format(cookies)+" Cookies"
 document.getElementById("diamonds").innerText="💎 "+diamonds
-
 }
 
 /* AUTOSAVE */
-
 setInterval(saveGame,5000)
 
 /* START */
-
 loadGame()
 buildStore()
 update()
