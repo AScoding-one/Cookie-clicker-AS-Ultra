@@ -25,6 +25,19 @@ body{margin:0;font-family:Arial;background:linear-gradient(#1a1a1a,#0e0e0e);colo
 #menu button{width:100%;padding:10px;margin-bottom:10px;border:none;border-radius:8px;background:#333;color:white;cursor:pointer;}
 #secretBox{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#222;padding:25px;border-radius:10px;z-index:1000;}
 #message{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;padding:10px 20px;border-radius:10px;display:none;z-index:1001;}
+  /* ANIMATION FÜR ZAHLEN */
+  .floatNumber{
+  position:absolute;
+  font-weight:bold;
+  color:yellow;
+  animation: floatUp 1s ease-out forwards;
+  z-index:1002;
+}
+@keyframes floatUp{
+  0%{opacity:1; transform:translateY(0);}
+  100%{opacity:0; transform:translateY(-50px);}
+}
+</style
 </style>
 </head>
 <body>
@@ -146,6 +159,17 @@ cookie.onclick=()=>{
   setTimeout(()=>cookie.classList.remove("pop"),100);
   if(Math.random()<0.01){diamonds++; showMessage("💎 Diamant gefunden!")}
   update();
+}
+  /* FLOATING NUMBER */
+function showFloatingNumber(text){
+  const num=document.createElement("div");
+  num.className="floatNumber";
+  num.innerText=text;
+  document.body.appendChild(num);
+  const rect=cookie.getBoundingClientRect();
+  num.style.left=(rect.left+rect.width/2-20)+"px";
+  num.style.top=(rect.top-20)+"px";
+  setTimeout(()=>num.remove(),1000);
 }
 
 /* UPDATE */
