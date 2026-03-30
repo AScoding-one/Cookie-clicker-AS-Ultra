@@ -156,6 +156,7 @@ function renderShop(){
 cookie.onclick=()=>{
   cookies+=clickPower;
   cookie.classList.add("pop");
+  showFloatingNumber("+"+formatNum(clickPower));
   setTimeout(()=>cookie.classList.remove("pop"),100);
   if(Math.random()<0.01){diamonds++; showMessage("💎 Diamant gefunden!")}
   update();
