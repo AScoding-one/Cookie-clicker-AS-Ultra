@@ -153,14 +153,11 @@ function renderShop(){
 }
 
 /* COOKIE CLICK */
-cookie.onclick=()=>{
-  cookies+=clickPower;
-  cookie.classList.add("pop");
-  showFloatingNumber("+"+formatNum(clickPower));
-  setTimeout(()=>cookie.classList.remove("pop"),100);
-  if(Math.random()<0.01){diamonds++; showMessage("💎 Diamant gefunden!")}
-  update();
-}
+cookie.onclick=()=>{ 
+  cookies+=clickPower; cookie.classList.add("pop"); 
+  setTimeout(()=>cookie.classList.remove("pop"),100); 
+  if(Math.random()<0.01){diamonds++; showMessage("💎 Diamant gefunden!")} update(); }
+  
   /* FLOATING NUMBER */
 function showFloatingNumber(text){
   const num=document.createElement("div");
